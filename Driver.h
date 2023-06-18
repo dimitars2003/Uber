@@ -30,4 +30,5 @@ public:
 	 Order& getOrder() ;
 	const Order* getOrderPointer() const;
 
+	void removeOrder();
 };
