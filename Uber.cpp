@@ -75,46 +75,14 @@ int mainMenu() {
 
 int main()
 {
-    /*while (true) {
+    while (true) {
         
         if (mainMenu()==1) {
             break;
         }
         
     }
-    */
-
-    //testing file things
-
-    MyString ms = ("nameName");
-    std::cout << "a" << ms.substr(4, 4)<<std::endl;
-
-    char a = '3';
-    std::cout <<"az sam a " << a << std::endl;
-
-    int aa = a;
-    std::cout << "az sam aa " << aa << std::endl;
-
     
-    if ("") {
-        std::cout << "pop";
-    }
-    else {
-        std::cout << "nqma";
-    }
-
-    std::cout << "\nExiting app" << std::endl;
-    std::ofstream out("Test.txt", 8);
-    char* name = new char[6] {"penis"};
-    MyString t = MyString(name);
-    out << t;
-    out.flush();
-    t = MyString("pen");
-    out << t;
-    out.flush();
-    std::ifstream in("Test.txt");
-    in >> t;
-    std::cout << t; 
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
