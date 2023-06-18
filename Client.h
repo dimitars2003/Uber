@@ -12,7 +12,7 @@ public:
 	Client();
 	Client(MyString username, MyString password, MyString firstName, MyString lastName);
 	
-	
+	void removeOrder();
 
 	~Client()=default;
 
@@ -21,4 +21,6 @@ public:
 	const Order* getOrderPointer() const;
 
 	void pay(int toPay);
+
+
 };
