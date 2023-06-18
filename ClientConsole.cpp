@@ -201,6 +201,9 @@ bool ClientConsole::isDriverFree() {
 }
 
 void ClientConsole::order() {
+	if (getClients()[indexCurrentClient].getOrder().isOrderCompleted()) {
+		getClients()[indexCurrentClient].removeOrder();
+	}
 	if (!isDriverFree()) {
 		std::cout << "No free driver. Please try again later.";
 		return;
@@ -218,9 +221,23 @@ void ClientConsole::order() {
 	assignDriver();
 }
 void ClientConsole::checkOrder() {
+	if (getClients()[indexCurrentClient].getOrderPointer() == nullptr) {
+		std::cout << "No orders. \n";
+	}
+	if (getClients()[indexCurrentClient].getOrder().isOrderCompleted()) {
+		getClients()[indexCurrentClient].removeOrder();
+		checkOrder();
+		return;
+	}
 	if (getClients()[indexCurrentClient].getOrder().getIsAccepted() == -1) {
 		std::cout << "Order has been canceled/denied. Removing order";
-		
+		int size = getOrderSystem().getOrders().getSize();
+		for (int i = 0; i < size; i++) {
+			if (&getOrderSystem().getOrders()[i] == getClients()[indexCurrentClient].getOrderPointer()) {
+				getOrderSystem().getOrders().popAt(i);
+				getClients()[indexCurrentClient].removeOrder();
+			}
+		}
 	}
 	if (getClients()[indexCurrentClient].getOrder().getIsAccepted() == 0) {
 		std::cout << "Still waiting for a responce from driver";
@@ -274,7 +291,9 @@ void ClientConsole::pay() {
 	getClients()[indexCurrentClient].getOrder().setCost(toPay);
 	getClients()[indexCurrentClient].getOrder().setIsPaid(true);
 
-	
+	if (getClients()[indexCurrentClient].getOrder().isOrderCompleted()) {
+		getClients()[indexCurrentClient].removeOrder();
+	}
 }
 
 void ClientConsole::rate()  {
@@ -292,7 +311,9 @@ void ClientConsole::rate()  {
 		}
 		getClients()[indexCurrentClient].getOrder().setRated(choice);
 	}
-	//completed order check
+	if (getClients()[indexCurrentClient].getOrder().isOrderCompleted()) {
+		getClients()[indexCurrentClient].removeOrder();
+	}
 }
 
 void ClientConsole::add_money() {

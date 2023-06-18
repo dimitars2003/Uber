@@ -12,6 +12,7 @@ public:
 	Client();
 	Client(MyString username, MyString password, MyString firstName, MyString lastName);
 	
+	
 
 	~Client()=default;
 

@@ -32,10 +32,15 @@ void Driver::setOrder(Order& order) {
 	this->order = &order;
 }
 
-const Order& Driver::getOrder() const {
+ Order& Driver::getOrder()  {
 	return *(this->order);
 }
 
 const Order* Driver::getOrderPointer() const {
 	return order;
+}
+
+
+void Driver::removeOrder() {
+	order = nullptr;
 }

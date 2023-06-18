@@ -26,3 +26,7 @@ void Client::setOrder( Order& order) {
 const Order* Client::getOrderPointer() const {
 	return order;
 }
+
+void Client::removeOrder() {
+	order = nullptr;
+}

@@ -23,7 +23,7 @@ public:
 	const MyString& getPassword() const;
 	const MyString& getFirstName() const;
 	const MyString& getLastName() const;
-	const int getBalance() ;
+	int getBalance() ;
 
 	virtual ~User() = default;
 	

@@ -32,7 +32,6 @@ void clientLog() {
             std::cout << "2. register\n";
         }
         else {
-            //clientManager.logout();
             return;
         }
     }
@@ -82,7 +81,7 @@ int main()
         }
         
     }
-    
+     
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

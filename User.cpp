@@ -37,7 +37,7 @@ const MyString& User::getLastName() const {
 	return lastName;
 }
 
-const int User::getBalance() const {
+ int User::getBalance()  {
 	return balance;
 }
 

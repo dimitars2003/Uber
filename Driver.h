@@ -27,7 +27,7 @@ public:
 	const Address& getAddress() const;
 	
 	void setOrder(Order& order);
-	const Order& getOrder() const;
+	 Order& getOrder() ;
 	const Order* getOrderPointer() const;
 
 };
