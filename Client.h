@@ -21,6 +21,4 @@ public:
 	const Order* getOrderPointer() const;
 
 	void pay(int toPay);
-
-
 };

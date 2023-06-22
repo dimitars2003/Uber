@@ -4,7 +4,7 @@ void DriverConsole::logedInMenu() {
 	std::cout << "Hello " << getDrivers()[indexCurrentDriver].getFirstName() << ".\n";
 	int choice = -1;
 	while (true) {
-		std::cout << "Driver Menu\n";
+		std::cout << "\nDriver Menu\n";
 		std::cout << "Enter the number of the action you wish to do\n";
 		std::cout << "Change Address - 1\n";
 		std::cout << "Check messages - 2\n";
@@ -60,11 +60,11 @@ void DriverConsole::login() {
 	int sizeD = getDrivers().getSize();
 
 	while (true) {
-		std::cout << "\nPlease enter your username";
+		std::cout << "\nPlease enter your username\n";
 		std::cin >> username;
 
 
-		std::cout << "\nPlease enter your password";
+		std::cout << "\nPlease enter your password\n";
 		std::cin >> password;
 
 
@@ -160,18 +160,22 @@ void DriverConsole::registerMe() {
 		Point p(x, y);
 		newAddress.setPoint(p);
 
-		MyString addressName;
+		
 		std::cout << "\nPlease enter your address name\n";
-		std::cin >> addressName;
+		char bufferAddressName[1024]{ "" };
+		std::cin.getline(bufferAddressName, 1024);
+		MyString addressName(bufferAddressName);
 		newAddress.setName(addressName);
 
 		std::cout << "Would you like to add additional information?\nYes - 1\nNo - 0\n";
 		int choice = -1;
 		std::cin >> choice;
 		if (choice) {
-			MyString addtionalInfo;
+			
 			std::cout << "\nPlease enter the additional information\n";
-			std::cin >> addtionalInfo;
+			char bufferAdditionalAddress[1024]{""};
+			std::cin.getline(bufferAdditionalAddress, 1024);
+			MyString addtionalInfo (bufferAdditionalAddress);
 			newAddress.setAdditionalInfo(addtionalInfo);
 		}
 
@@ -200,18 +204,28 @@ void DriverConsole::changeAddress() {
 	Point p(x, y);
 	newAddress.setPoint(p);
 
-	MyString addressName;
+	
+	
+	char bufferAddressName[1024]{""};
 	std::cout << "\nPlease enter your address name\n";
-	std::cin >> addressName;
+	std::cin.ignore();
+	std::cin.getline(bufferAddressName, 1024);
+
+	MyString addressName(bufferAddressName);
+	
 	newAddress.setName(addressName);
 
 	std::cout << "Would you like to add additional information?\nYes - 1\nNo - 0\n";
 	int choice = -1;
 	std::cin >> choice;
 	if (choice) {
-		MyString addtionalInfo;
+		
 		std::cout << "\nPlease enter the additional information\n";
-		std::cin >> addtionalInfo;
+		
+		char bufferAdditionalAddress[1024]{ "" };
+		std::cin.ignore();
+		std::cin.getline(bufferAdditionalAddress, 1024);
+		MyString addtionalInfo(bufferAdditionalAddress);
 		newAddress.setAdditionalInfo(addtionalInfo);
 	}
 	getDrivers()[indexCurrentDriver].setAddress(newAddress);
@@ -219,7 +233,7 @@ void DriverConsole::changeAddress() {
 
 void DriverConsole::check_messages() {
 	if (getDrivers()[indexCurrentDriver].getOrderPointer() == nullptr) {
-		std::cout << "No orders. \n";
+		std::cout << "\nNo orders. \n";
 	}
 	
 	if (getDrivers()[indexCurrentDriver].getOrderPointer() != nullptr) {
@@ -237,6 +251,10 @@ void DriverConsole::check_messages() {
 }
 
 void DriverConsole::acceptOrder() {
+	if (getDrivers()[indexCurrentDriver].getOrderPointer() == nullptr) {
+		std::cout << "\nNo order to accept\n";
+		return;
+	}
 	if (getDrivers()[indexCurrentDriver].getOrder().getIsAccepted() != -1) {
 		while (true) {
 			
@@ -255,16 +273,36 @@ void DriverConsole::acceptOrder() {
 }
 
 void DriverConsole::declineOrder() {
-	getDrivers()[indexCurrentDriver].getOrder().setIsAccepted(-1);
-	getDrivers()[indexCurrentDriver].removeOrder();
+	if (getDrivers()[indexCurrentDriver].getOrderPointer() == nullptr) {
+		std::cout << "\nNo order to decline\n";
+		return;
+	}
+	if (getDrivers()[indexCurrentDriver].getOrder().getIsAccepted() == -1) {
+		getDrivers()[indexCurrentDriver].removeOrder();
+		return;
+	}
+	if (getDrivers()[indexCurrentDriver].getOrder().getIsAccepted() == 0) {
+		getDrivers()[indexCurrentDriver].getOrder().setIsAccepted(-1);
+		getDrivers()[indexCurrentDriver].removeOrder();
+		return;
+	}
+	
 }
 
 void DriverConsole::finishOrder() {
+	if (getDrivers()[indexCurrentDriver].getOrderPointer() == nullptr) {
+		std::cout << "\nNo order to finish\n";
+		return;
+	}
 	getDrivers()[indexCurrentDriver].getOrder().setIsFinished(true);
 	
 }
 
 void DriverConsole::acceptPayment() {
+	if (getDrivers()[indexCurrentDriver].getOrderPointer() == nullptr) {
+		std::cout << "\nNo payment to be recieved\n";
+		return;
+	}
 	if (getDrivers()[indexCurrentDriver].getOrder().getIsPaid()) {
 		getDrivers()[indexCurrentDriver].getOrder().setPaymentRecieved(true);
 		getDrivers()[indexCurrentDriver].addToBalance(getDrivers()[indexCurrentDriver].getOrder().getCost());

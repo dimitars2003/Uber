@@ -5,11 +5,11 @@
 
 void ClientConsole::logedInMenu()  {
 
-	std::cout << "Hello " << getClients()[indexCurrentClient].getFirstName()<<".\n";
+	std::cout << "\nHello " << getClients()[indexCurrentClient].getFirstName()<<".\n";
 	int choice = -1;
 	while (true) {
-		std::cout << "Client Menu\n";
-		std::cout << "Current Balance: " << getClients()[indexCurrentClient].getBalance();
+		std::cout << "\nClient Menu\n";
+		std::cout << "Current Balance: " << getClients()[indexCurrentClient].getBalance() << "\n";
 		std::cout << "Enter the number of the action you wish to do\n";
 		std::cout << "Order - 1\n";
 		std::cout << "Check order information - 2\n";
@@ -65,11 +65,11 @@ void ClientConsole::login()  {
 	int sizeC = getClients().getSize();
 
 	while (true) {
-		std::cout << "\nPlease enter your username";
+		std::cout << "\nPlease enter your username\n";
 		std::cin >> username;
 		
 
-		std::cout << "\nPlease enter your password";
+		std::cout << "\nPlease enter your password\n";
 		std::cin >> password;
 		
 		
@@ -172,21 +172,28 @@ const Address& ClientConsole::orderAddress() {
 	Point p(x, y);
 	newAddress.setPoint(p);
 
-	MyString addressName;
+	char bufferAddressName[1024]{ "" };
 	std::cout << "\nPlease enter your address name\n";
-	std::cin >> addressName;
+	std::cin.ignore();
+	std::cin.getline(bufferAddressName, 1024);
+	
+	MyString addressName(bufferAddressName);
 	newAddress.setName(addressName);
 
 	std::cout << "Would you like to add additional information?\nYes - 1\nNo - 0\n";
 	int choice = -1;
 	std::cin >> choice;
 	if (choice) {
-		MyString addtionalInfo;
-		std::cout << "\nPlease enter the additional information\n";
-		std::cin >> addtionalInfo;
+
+		char bufferAdditionalAddress[1024]{ "" };
+		std::cin.ignore();
+		std::cin.getline(bufferAdditionalAddress, 1024);
+		
+		MyString addtionalInfo(bufferAdditionalAddress);
 		newAddress.setAdditionalInfo(addtionalInfo);
 	}
-	
+	return newAddress;
+
 }
 
 bool ClientConsole::isDriverFree() {
@@ -201,28 +208,39 @@ bool ClientConsole::isDriverFree() {
 }
 
 void ClientConsole::order() {
-	if (getClients()[indexCurrentClient].getOrder().isOrderCompleted()) {
-		getClients()[indexCurrentClient].removeOrder();
-	}
-	if (!isDriverFree()) {
-		std::cout << "No free driver. Please try again later.";
-		return;
-	}
-	std::cout << "\nCreate order\n";
-	std::cout << "Enter your Address\n";
-	Address current = orderAddress();
-	std::cout << "Enter your Destination\n";
-	Address destination = orderAddress();
 	
+	if (getClients()[indexCurrentClient].getOrderPointer() == nullptr) {
 
-	getOrderSystem().createOrder(current,destination,indexCurrentClient);
-	getClients()[indexCurrentClient].setOrder(getOrderSystem().getOrders()[getOrderSystem().getOrders().getSize() - 1]);
 
-	assignDriver();
+
+		if (!isDriverFree()) {
+			std::cout << "No free driver. Please try again later.";
+			return;
+		}
+		std::cout << "\nCreate order\n";
+		std::cout << "Enter your Address\n";
+		Address current = orderAddress();
+		std::cout << "Enter your Destination\n";
+		Address destination = orderAddress();
+
+
+		getOrderSystem().createOrder(current, destination, indexCurrentClient);
+		getClients()[indexCurrentClient].setOrder(getOrderSystem().getOrders()[getOrderSystem().getOrders().getSize() - 1]);
+
+		assignDriver();
+	}
+	else if (getClients()[indexCurrentClient].getOrder().isOrderCompleted()) {
+		getClients()[indexCurrentClient].removeOrder();
+		order();
+	}
+	else {
+		std::cout << "You already have an order. To make a new order, please cancel the previous one." << std::endl;
+	}
 }
 void ClientConsole::checkOrder() {
 	if (getClients()[indexCurrentClient].getOrderPointer() == nullptr) {
 		std::cout << "No orders. \n";
+		return;
 	}
 	if (getClients()[indexCurrentClient].getOrder().isOrderCompleted()) {
 		getClients()[indexCurrentClient].removeOrder();
@@ -238,29 +256,67 @@ void ClientConsole::checkOrder() {
 				getClients()[indexCurrentClient].removeOrder();
 			}
 		}
+		return;
 	}
 	if (getClients()[indexCurrentClient].getOrder().getIsAccepted() == 0) {
 		std::cout << "Still waiting for a responce from driver";
+		return;
 	}
 	if (getClients()[indexCurrentClient].getOrder().getIsAccepted() == 1) {
 		std::cout << "Order is accepted. Minutes Left: " << getClients()[indexCurrentClient].getOrder().getMinutesLeft() << "\n";
 		std::cout << "Driver info: " << getDrivers()[getClients()[indexCurrentClient].getOrder().getIdDriver()].getFirstName() << " " 
 			<< getDrivers()[getClients()[indexCurrentClient].getOrder().getIdDriver()].getLastName() << "\n";
+		return;
 	}
 }
 
 void ClientConsole::cancelOrder() {
-	if(getClients()[indexCurrentClient].getOrder().getIsAccepted()!=1&& getClients()[indexCurrentClient].getOrder().getIsFinished()!=1)
-	getClients()[indexCurrentClient].getOrder().setIsAccepted(-1);
+	if (getClients()[indexCurrentClient].getOrderPointer() == nullptr) {
+		std::cout << "\nNo order to cancel. \n";
+		return;
+	}
+
+	if (getClients()[indexCurrentClient].getOrder().isOrderCompleted()) {
+		getClients()[indexCurrentClient].removeOrder();
+		cancelOrder();
+	}
+	
+	if (getClients()[indexCurrentClient].getOrder().getIsAccepted() != 1 && getClients()[indexCurrentClient].getOrder().getIsFinished() != 1) {
+		getClients()[indexCurrentClient].getOrder().setIsAccepted(-1);
+		getClients()[indexCurrentClient].removeOrder();
+	}
+	return;
 }
 
 void ClientConsole::pay() {
-	int toPay = 0;
-	int choice = 0;
-	if (getClients()[indexCurrentClient].getOrder().getIsPaid()) {
-		std::cout << "Order already paid.\n";
+	if (getClients()[indexCurrentClient].getOrderPointer() == nullptr) {
+		std::cout << "\nNo order to pay. \n";
 		return;
 	}
+	
+	if (getClients()[indexCurrentClient].getOrder().getIsPaid()) {
+		std::cout << "Order is already paid.\n";
+		return;
+	}
+
+	if (!getClients()[indexCurrentClient].getOrder().getIsFinished()) {
+		std::cout << "Order is not finished\n";
+		return;
+	}
+
+	if (!getClients()[indexCurrentClient].getOrder().getIsAccepted()) {
+		std::cout << "Order is still waiting for a driver responce\n";
+		return;
+	}
+	if (getClients()[indexCurrentClient].getOrder().getIsAccepted()==-1) {
+		std::cout << "Order is canceled/declined\n";
+		getClients()[indexCurrentClient].removeOrder();
+		return;
+	}
+
+	int toPay = 0;
+	int choice = 0;
+	
 	while (true) {
 		
 		std::cout << "How much would you like to pay?\n";
@@ -294,13 +350,37 @@ void ClientConsole::pay() {
 	if (getClients()[indexCurrentClient].getOrder().isOrderCompleted()) {
 		getClients()[indexCurrentClient].removeOrder();
 	}
+	return;
 }
 
 void ClientConsole::rate()  {
+	
+	if (getClients()[indexCurrentClient].getOrderPointer() == nullptr) {
+		std::cout << "No order to rate.\n";
+		return;
+	}
+
+	if (getClients()[indexCurrentClient].getOrder().getRated()) {
+		std::cout << "Order is already paid.\n";
+		return;
+	}
+
 	if (!getClients()[indexCurrentClient].getOrder().getIsFinished()) {
 		std::cout << "The order is still not finished \n";
 		return;
 	}
+	
+	if (!getClients()[indexCurrentClient].getOrder().getIsAccepted()) {
+		std::cout << "Order is still waiting for a driver responce\n";
+		return;
+	}
+	
+	if (getClients()[indexCurrentClient].getOrder().getIsAccepted() == -1) {
+		std::cout << "Order is canceled/declined\n";
+		getClients()[indexCurrentClient].removeOrder();
+		return;
+	}
+	
 	while (true) {
 		std::cout << "Rate your driver from 1 to 5. \n";
 		int choice = 0;
@@ -314,10 +394,11 @@ void ClientConsole::rate()  {
 	if (getClients()[indexCurrentClient].getOrder().isOrderCompleted()) {
 		getClients()[indexCurrentClient].removeOrder();
 	}
+	return;
 }
 
 void ClientConsole::add_money() {
-	std::cout << "How much would you like to add?\n";
+	
 	int toAdd = 0;
 	
 	while (true) {
@@ -328,7 +409,9 @@ void ClientConsole::add_money() {
 			continue;
 		}
 		getClients()[indexCurrentClient].addToBalance(toAdd);
+		break;
 	}
+	return;
 }
 
 
@@ -340,7 +423,7 @@ void ClientConsole::assignDriver() {
 
 	for (int i = 0; i < size; i++) {
 		if (minDistance > start.getDistance(getDrivers()[i].getAddress().getPoint())) {
-			if (getDrivers()[i].getOrderPointer() != nullptr) {
+			if (getDrivers()[i].getOrderPointer() == nullptr) {
 				minDistance = start.getDistance(getDrivers()[i].getAddress().getPoint());
 				indexDriverClosest = i;
 			}
@@ -349,5 +432,5 @@ void ClientConsole::assignDriver() {
 
 	getClients()[indexCurrentClient].getOrder().setIdDriver(indexDriverClosest);
 	getDrivers()[indexDriverClosest].setOrder(getClients()[indexCurrentClient].getOrder());
-
+	return;
 }

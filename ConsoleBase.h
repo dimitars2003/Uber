@@ -6,8 +6,7 @@
 
 class ConsoleBase {
 private:
-	//helper
-	int getFileSize(std::ifstream& in) const;
+	
 	char* getBeforeComma(MyString& other);
 
 	void readClients(std::ifstream& in);
@@ -22,6 +21,10 @@ private:
 
 	void connectOrders();
 
+	void printDriver(int i);
+	void printClient(int i);
+
+	void spaceParser(const MyString& toParse, std::ostream&);
 public:
 	
 	ConsoleBase();

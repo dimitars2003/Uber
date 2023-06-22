@@ -171,3 +171,12 @@ bool operator!=(const MyString& lhs, const MyString& rhs)
 {
 	return strcmp(lhs.c_str(), rhs.c_str()) != 0;
 }
+
+bool MyString::hasSpace() const {
+	for (int i = 0; i < length(); i++) {
+		if (_data[i] == ' ') {
+			return true;
+		}
+	}
+	return false;
+}

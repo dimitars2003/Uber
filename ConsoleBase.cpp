@@ -4,29 +4,28 @@
 #include <sstream>
 
 
-int ConsoleBase::getFileSize(std::ifstream& in) const {//delete
-	size_t current = in.tellg();
-	in.seekg(0, std::ios::end);
-	size_t size = in.tellg();
-	in.seekg(current, std::ios::beg);
 
-	return size;
-}
 
 char* ConsoleBase::getBeforeComma(MyString& other) {
 
 	int size = other.length();
+	
 	char* buffer = new char[size];
 
-
+	size_t temp;
 	for (int i = 0; i < size; i++) {
 		if (other[i] == ',') {
 
 			buffer[i] = '\0';
-			other = other.substr(i, static_cast<size_t>(size) - i);
+			temp = size - i;
+
+			other = other.substr(i+1, temp-1);
+			
+			
 			return buffer;
 		}
 		buffer[i] = other[i];
+
 	}
 }
 
@@ -37,31 +36,37 @@ void ConsoleBase::readClients(std::ifstream& in) {
 	}
 	int counter = 0;
 	Vector<MyString> lines;
-
+	std::cout << "Clients\n";
 	while (!in.eof()) {
 
 		char buffer[1024];
 		in.getline(buffer, 1024);
-		lines[counter] = buffer;
+		lines.pushBack (buffer);
 		counter++;
 	}
 	MyString line;
 	Client toPush;
 	for (int i = 0; i < counter; i++) {
 
+		if (lines[i].length() == 0) {
+			continue;
+		}
+
 		toPush.setFirstName(getBeforeComma(lines[i]));
 		toPush.setLastName(getBeforeComma(lines[i]));
+		
 		toPush.setUsername(getBeforeComma(lines[i]));
 		toPush.setPassword(getBeforeComma(lines[i]));
 		
 		std::stringstream ss(getBeforeComma(lines[i]));
+		
 		int balance;
 		ss >> balance;
 		toPush.setBalance(balance);
 		
 		clients.pushBack(toPush);
-		std::cout << clients[i].getFirstName() << "," << clients[i].getLastName() << "," << clients[i].getPassword() << "," << clients[i].getUsername()
-			<< "," << clients[i].getBalance() << std::endl;
+
+		printClient(i);
 	}
 }
 
@@ -73,12 +78,12 @@ void ConsoleBase::readDrivers(std::ifstream& in) {
 	}
 	int counter = 0;
 	Vector<MyString> lines;
-
+	std::cout << "Drivers\n";
 	while (!in.eof()) {
 
 		char buffer[1024];
 		in.getline(buffer, 1024);
-		lines[counter] = buffer;
+		lines.pushBack(buffer);
 		counter++;
 	}
 
@@ -90,6 +95,10 @@ void ConsoleBase::readDrivers(std::ifstream& in) {
 	int y;
 	
 	for (int i = 0; i < counter; i++) {
+
+		if (lines[i].length() == 0) {
+			continue;
+		}
 
 		toPush.setFirstName(getBeforeComma(lines[i]));
 		toPush.setLastName(getBeforeComma(lines[i]));
@@ -113,18 +122,22 @@ void ConsoleBase::readDrivers(std::ifstream& in) {
 		driverAddress.setPoint(p);
 
 		driverAddress.setName(getBeforeComma(lines[i]));
-
-		if (getBeforeComma(lines[i])[0] != '\0') {
-			driverAddress.setAdditionalInfo(getBeforeComma(lines[i]));
+		
+		MyString additionalInfoCheck(getBeforeComma(lines[i]));
+		
+		if (additionalInfoCheck[0] != '\0') {
+			
+			driverAddress.setAdditionalInfo(additionalInfoCheck);
+		}
+		else {
+			driverAddress.setAdditionalInfo("\0");
 		}
 
 		toPush.setAddress(driverAddress);
 		
 		drivers.pushBack(toPush);
 
-		std::cout << drivers[i].getFirstName() << "," << drivers[i].getLastName() << "," << drivers[i].getPassword() << "," << drivers[i].getUsername() << "," 
-			<< drivers[i].getBalance() << "," << drivers[i].getNumber() << "," << drivers[i].getCarNumber() << "," << drivers[i].getAddress().getPoint().getX()
-			<< "," << drivers[i].getAddress().getPoint().getY()	<< "," << drivers[i].getAddress().getName() << "," << drivers[i].getAddress().getAdditionalInfo() << std::endl;
+		printDriver(i);
 	}
 }
 
@@ -169,7 +182,7 @@ void ConsoleBase::writeClients(std::ofstream& out) {
 		out << clients[i].getLastName() << ",";
 		out << clients[i].getUsername() << ",";
 		out << clients[i].getPassword() << ",";
-		out << clients[i].getBalance() << "\n";
+		out << clients[i].getBalance() << ",\n";
 
 	}
 }
@@ -192,11 +205,35 @@ void ConsoleBase::writeDrivers(std::ofstream& out) {
 
 		out << drivers[i].getAddress().getPoint().getX() << ",";
 		out << drivers[i].getAddress().getPoint().getY() << ",";
-		out << drivers[i].getAddress().getName() << ",";
-		out << drivers[i].getAddress().getAdditionalInfo() << "\n";
-
-
+		
+		if(!drivers[i].getAddress().getName().hasSpace())
+			out << drivers[i].getAddress().getName() << ",";
+		else {
+			spaceParser(drivers[i].getAddress().getName(), out);
+			out << ",";
+		}
+		
+		
+		if (!drivers[i].getAddress().getAdditionalInfo().hasSpace())
+			out << drivers[i].getAddress().getAdditionalInfo() << ",\n";
+		else {
+			spaceParser(drivers[i].getAddress().getAdditionalInfo(), out);
+			out << ",";
+			out << "\n";
+		}
 	}
+}
+
+void ConsoleBase::spaceParser(const MyString& toParse, std::ostream& out) {
+	for (int i = 0; i < toParse.length(); i++) {
+		if (toParse[i] == ' ') {
+			out << " ";
+		}
+		else {
+			out << toParse[i];
+		}
+	}
+	return;
 }
 
 ConsoleBase::~ConsoleBase() {
@@ -225,3 +262,15 @@ Vector<Driver>& ConsoleBase::getDrivers()  {
  OrderSystem& ConsoleBase::getOrderSystem() {
 	return orders;
 }
+
+
+ void ConsoleBase::printDriver(int i) {
+	 std::cout << drivers[i].getFirstName() << "," << drivers[i].getLastName()  << "," << drivers[i].getUsername() << ","  << drivers[i].getPassword() << ","
+		 << drivers[i].getBalance() << "," << drivers[i].getNumber() << "," << drivers[i].getCarNumber() << "," << drivers[i].getAddress().getPoint().getX()
+		 << "," << drivers[i].getAddress().getPoint().getY() << "," << drivers[i].getAddress().getName() << "," << drivers[i].getAddress().getAdditionalInfo() << std::endl;
+ }
+ void ConsoleBase::printClient(int i) {
+	 
+	 std::cout << clients[i].getFirstName() << "," << clients[i].getLastName()  << "," << clients[i].getUsername() << "," << clients[i].getPassword()
+		 << "," << clients[i].getBalance() << std::endl;
+ }

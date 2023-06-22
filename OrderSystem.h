@@ -9,6 +9,10 @@ private:
 	int charToInt(MyString& line);
 	const Address& addressMake(MyString& line);
 	
+	void writeToFile();
+	void spaceParser(const MyString& toParse, std::ostream& out);
+	void readFromFile();
+	void print(int index) const;
 
 public:
 	OrderSystem();

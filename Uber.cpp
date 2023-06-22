@@ -6,6 +6,7 @@
 #include "MyString.h"
 #include <string>
 #include "ClientConsole.h"
+#include "DriverConsole.h"
 
 int log() {
 
@@ -21,6 +22,7 @@ int log() {
 void clientLog() {
     ClientConsole clientManager;
     while (true) {
+        std::cout << "\nClient logger\n";
         int choice = log();
         
         if (choice == 1) {
@@ -38,13 +40,19 @@ void clientLog() {
 }
 
 void driverLog() {
-    while (true) {
+    DriverConsole driverManager;
+
+    while (true) {  
+        std::cout << "\nDriver logger\n";
         int choice = log();
         if (choice == 1) {
+            driverManager.login();
             std::cout << "1. login\n";
         }
         else if (choice == 2) {
             std::cout << "2. login\n";
+            driverManager.registerMe();
+            
         }
         else {
             return;
@@ -53,6 +61,8 @@ void driverLog() {
 }
 
 int mainMenu() {
+
+    
 
     std::cout << "Hello, are you a client or a driver \n";
     std::cout << "1. Client\n";
@@ -74,6 +84,8 @@ int mainMenu() {
 
 int main()
 {
+    
+   
     while (true) {
         
         if (mainMenu()==1) {
