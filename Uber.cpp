@@ -84,10 +84,7 @@ int mainMenu() {
 
 int main()
 {
-  //TO FIX:
-    //ORDER: writing in file -> 1
-    //ORDER: reading in file -> 0???
-    //potencial: order remover 
+  
    
     while (true) {
         
