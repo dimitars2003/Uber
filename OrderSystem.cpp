@@ -7,7 +7,7 @@ char* OrderSystem::getBeforeComma(MyString& other) {
 	int size = other.length();
 	char* buffer = new char[size];
 
-
+	//std::cout << other<<"\n";
 	for (int i = 0; i < size; i++) {
 		if (other[i] == ',') {
 
@@ -21,15 +21,18 @@ char* OrderSystem::getBeforeComma(MyString& other) {
 
 int OrderSystem::charToInt(MyString& line) {
 	int toReturn = 0;
+	
 	char* charToInt = getBeforeComma(line);
+	
 	std::stringstream ssR;
 	ssR << charToInt;
 	ssR >> toReturn;
+	
 	return toReturn;
 	
 }
 
-const Address& OrderSystem::addressMake(MyString& line) {
+Address OrderSystem::addressMake(MyString& line) {
 	Address toReturn;
 	int x = charToInt(line);;
 	int y = charToInt(line);;
@@ -40,14 +43,15 @@ const Address& OrderSystem::addressMake(MyString& line) {
 	toReturn.setPoint(p);
 
 	toReturn.setName(getBeforeComma(line));
-
+	//std::cout << toReturn.getName() << " name\n";
 	MyString checkAdditional(getBeforeComma(line));
 	if (checkAdditional[0] != '\0') {
-		toReturn.setAdditionalInfo(getBeforeComma(line));
+		toReturn.setAdditionalInfo(checkAdditional);
 	}
 	else {
 		toReturn.setAdditionalInfo("\0");
 	}
+	//std::cout << toReturn.getAdditionalInfo()<<" add\n";
 	return toReturn;
 }
 
@@ -82,7 +86,7 @@ void OrderSystem::writeToFile() {
 		return;
 	}
 	for (int i = 0; i < orders.getSize(); i++) {
-		
+		print(i);
 		out << orders[i].getCurrentAddress().getPoint().getX() << ",";
 		out << orders[i].getCurrentAddress().getPoint().getY() << ",";
 		
@@ -131,6 +135,7 @@ void OrderSystem::writeToFile() {
 		out << orders[i].getPaymentRecieved() << ",\n";
 
 	}
+	out.close();
 }
 
 void OrderSystem::spaceParser(const MyString& toParse, std::ostream& out) {
@@ -164,6 +169,8 @@ void OrderSystem::readFromFile() {
 		counter++;
 	}
 	Order toPush;
+	int temp = 0;
+	std::cout << "Orders\n";
 	for (int i = 0; i < counter; i++) {
 		if (lines[i].length() == 0) {
 			continue;
@@ -192,12 +199,33 @@ void OrderSystem::readFromFile() {
 		toPush.setRated(charToInt(lines[i]));
 
 		
-		toPush.setIsFinished(charToInt(lines[i]));
+		
+
+		temp = charToInt(lines[i]);
+		if (temp) {
+			toPush.setIsFinished(true);
+		}
+		else {
+			toPush.setIsFinished(false);
+		}
+
+		temp = charToInt(lines[i]);
+		if (temp) {
+			toPush.setIsPaid(true);
+		}
+		else {
+			toPush.setIsPaid(false);
+		}
 
 
-		toPush.setIsPaid(charToInt(lines[i]));
-
-		toPush.setPaymentRecieved(charToInt(lines[i]));
+		temp = charToInt(lines[i]);
+		
+		if (temp) {
+			toPush.setPaymentRecieved(true);
+		}
+		else {
+			toPush.setPaymentRecieved(false);
+		}
 
 		orders.pushBack(toPush);
 

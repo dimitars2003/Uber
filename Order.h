@@ -11,6 +11,7 @@ private:
 	int idDriver = -1;
 	int isAccepted = 0;
 	int rating = 0;
+
 	
 	bool isFinished = 0;
 	bool isPaid = 0;

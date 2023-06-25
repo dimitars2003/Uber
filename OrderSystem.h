@@ -7,7 +7,7 @@ private:
 	Vector<Order> orders;
 	char* getBeforeComma(MyString& other);
 	int charToInt(MyString& line);
-	const Address& addressMake(MyString& line);
+	Address addressMake(MyString& line);
 	
 	void writeToFile();
 	void spaceParser(const MyString& toParse, std::ostream& out);

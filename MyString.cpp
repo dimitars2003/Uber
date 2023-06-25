@@ -1,5 +1,5 @@
 ﻿#include "MyString.h"
-
+#pragma warning(disable : 4996)
 //from https://github.com/Angeld55/Object-oriented_programming_FMI/blob/master/Week%2009/MyString%20(with%20move)/MyString.cpp
 
 MyString::MyString(size_t capacity)

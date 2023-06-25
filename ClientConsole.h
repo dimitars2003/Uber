@@ -8,7 +8,7 @@ private:
 
 	void logedInMenu() ;
 	
-	const Address& orderAddress();
+	Address orderAddress();
 
 	void assignDriver();
 

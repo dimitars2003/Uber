@@ -27,11 +27,11 @@ void clientLog() {
         
         if (choice == 1) {
             clientManager.login();
-            std::cout << "1. login\n";
+            
         }
         else if (choice == 2) {
             clientManager.registerMe();
-            std::cout << "2. register\n";
+            
         }
         else {
             return;
@@ -47,10 +47,10 @@ void driverLog() {
         int choice = log();
         if (choice == 1) {
             driverManager.login();
-            std::cout << "1. login\n";
+            
         }
         else if (choice == 2) {
-            std::cout << "2. login\n";
+            
             driverManager.registerMe();
             
         }
@@ -84,7 +84,10 @@ int mainMenu() {
 
 int main()
 {
-    
+  //TO FIX:
+    //ORDER: writing in file -> 1
+    //ORDER: reading in file -> 0???
+    //potencial: order remover 
    
     while (true) {
         

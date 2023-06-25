@@ -243,8 +243,8 @@ void DriverConsole::check_messages() {
 			return;
 		}
 		if (getDrivers()[indexCurrentDriver].getOrder().getIsAccepted() != -1) {
-			std::cout << "You have an order. \n";
-			std::cout << "From" << getDrivers()[indexCurrentDriver].getAddress().getName();
+			std::cout << "\nYou have an order. \n";
+			std::cout << "From " << getDrivers()[indexCurrentDriver].getOrder().getCurrentAddress().getName() << " to " << getDrivers()[indexCurrentDriver].getOrder().getDestination().getName();
 
 		}
 	}
@@ -255,10 +255,15 @@ void DriverConsole::acceptOrder() {
 		std::cout << "\nNo order to accept\n";
 		return;
 	}
-	if (getDrivers()[indexCurrentDriver].getOrder().getIsAccepted() != -1) {
+
+	if (getDrivers()[indexCurrentDriver].getOrder().getIsAccepted() == 1) {
+		std::cout << "\nOrder has already been accepted.\n";
+	}
+
+	if (getDrivers()[indexCurrentDriver].getOrder().getIsAccepted() == 0) {
 		while (true) {
 			
-			std::cout << "How many minutes to arrival";
+			std::cout << "\nHow many minutes to arrival\n";
 			int minutes = 0;
 			std::cin >> minutes;
 			
@@ -268,7 +273,14 @@ void DriverConsole::acceptOrder() {
 			}
 
 			getDrivers()[indexCurrentDriver].getOrder().setMinutesLeft(minutes);
+			getDrivers()[indexCurrentDriver].getOrder().setIsAccepted(1);
+			return;
 		}
+	}
+	if (getDrivers()[indexCurrentDriver].getOrder().getIsAccepted() == -1) {
+		getDrivers()[indexCurrentDriver].removeOrder();
+		acceptOrder();
+		return;
 	}
 }
 
@@ -277,10 +289,25 @@ void DriverConsole::declineOrder() {
 		std::cout << "\nNo order to decline\n";
 		return;
 	}
+	
 	if (getDrivers()[indexCurrentDriver].getOrder().getIsAccepted() == -1) {
 		getDrivers()[indexCurrentDriver].removeOrder();
+		declineOrder();
 		return;
 	}
+
+	if (getDrivers()[indexCurrentDriver].getOrder().isOrderCompleted()) {
+		getDrivers()[indexCurrentDriver].removeOrder();
+		declineOrder();
+		return;
+	}
+
+	if (getDrivers()[indexCurrentDriver].getOrder().getIsAccepted() == 1) {
+		std::cout << "\nOrder already accepted\n";
+		
+		return;
+	}
+
 	if (getDrivers()[indexCurrentDriver].getOrder().getIsAccepted() == 0) {
 		getDrivers()[indexCurrentDriver].getOrder().setIsAccepted(-1);
 		getDrivers()[indexCurrentDriver].removeOrder();
@@ -294,8 +321,16 @@ void DriverConsole::finishOrder() {
 		std::cout << "\nNo order to finish\n";
 		return;
 	}
-	getDrivers()[indexCurrentDriver].getOrder().setIsFinished(true);
-	
+
+	if (getDrivers()[indexCurrentDriver].getOrder().getIsAccepted() == 1) {
+		getDrivers()[indexCurrentDriver].getOrder().setIsFinished(true);
+		std::cout << "\nOrder has been finished. Waiting for payment.\n";
+
+	}
+	else {
+		std::cout << "\nNo accepted order to be finished.\n";
+	}
+	return;
 }
 
 void DriverConsole::acceptPayment() {
@@ -303,10 +338,15 @@ void DriverConsole::acceptPayment() {
 		std::cout << "\nNo payment to be recieved\n";
 		return;
 	}
-	if (getDrivers()[indexCurrentDriver].getOrder().getIsPaid()) {
+
+	if (getDrivers()[indexCurrentDriver].getOrder().getIsFinished() && getDrivers()[indexCurrentDriver].getOrder().getIsPaid()) {
 		getDrivers()[indexCurrentDriver].getOrder().setPaymentRecieved(true);
 		getDrivers()[indexCurrentDriver].addToBalance(getDrivers()[indexCurrentDriver].getOrder().getCost());
+		std::cout << "\nPayment accepted.\n";
 
+	}
+	else {
+		std::cout << "\nOrder not finished or still waiting to be paid.\n";
 	}
 	if (getDrivers()[indexCurrentDriver].getOrder().isOrderCompleted()) {
 		getDrivers()[indexCurrentDriver].removeOrder();

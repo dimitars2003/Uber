@@ -144,11 +144,11 @@ void ConsoleBase::readDrivers(std::ifstream& in) {
 void ConsoleBase:: connectOrders() {
 	int size = orders.getOrders().getSize();
 	for (int i = 0; i < size; i++) {
-		if (!orders.getOrders()[i].isOrderCompleted()) {
+		if (!orders.getOrders()[i].isOrderCompleted()&&!orders.getOrders()[i].isOrderDeclined()) {
 			
 			if (clients[orders.getOrders()[i].getIdClient()].getOrderPointer() != nullptr);
 			clients[orders.getOrders()[i].getIdClient()].setOrder(orders.getOrders()[i]);
-
+			
 			if (drivers[orders.getOrders()[i].getIdClient()].getOrderPointer() != nullptr);
 			drivers[orders.getOrders()[i].getIdDriver()].setOrder(orders.getOrders()[i]);
 		}
@@ -169,7 +169,7 @@ ConsoleBase::ConsoleBase() : clients(), drivers() , orders(){
 	readDrivers(inD);
 	inD.close();
 
-	
+	connectOrders();
 }
 
 void ConsoleBase::writeClients(std::ofstream& out) {

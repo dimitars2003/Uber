@@ -157,7 +157,7 @@ void ClientConsole::registerMe() {
 	logedInMenu();
 }
 
-const Address& ClientConsole::orderAddress() {
+ Address ClientConsole::orderAddress() {
 	int x = 0;
 	int y = 0;
 	Address newAddress;
@@ -192,6 +192,11 @@ const Address& ClientConsole::orderAddress() {
 		MyString addtionalInfo(bufferAdditionalAddress);
 		newAddress.setAdditionalInfo(addtionalInfo);
 	}
+	else {
+		newAddress.setAdditionalInfo("");
+	}
+	std::cout << newAddress.getName()<<"\n";// << " " << newAddress.getAdditionalInfo() << "\n";
+
 	return newAddress;
 
 }
@@ -203,6 +208,12 @@ bool ClientConsole::isDriverFree() {
 		if (getDrivers()[i].getOrderPointer() == nullptr) {
 			return true;
 		}
+		if (getDrivers()[i].getOrder().isOrderCompleted()||getDrivers()[i].getOrder().isOrderDeclined()) {
+			i--;
+			getDrivers()[i].removeOrder();
+			continue;
+		}
+		
 	}
 	return false;
 }
@@ -218,8 +229,10 @@ void ClientConsole::order() {
 			return;
 		}
 		std::cout << "\nCreate order\n";
+		
 		std::cout << "Enter your Address\n";
 		Address current = orderAddress();
+		
 		std::cout << "Enter your Destination\n";
 		Address destination = orderAddress();
 
@@ -233,8 +246,11 @@ void ClientConsole::order() {
 		getClients()[indexCurrentClient].removeOrder();
 		order();
 	}
-	else {
+	else if(getClients()[indexCurrentClient].getOrder().isOrderAccepted()==0){
 		std::cout << "You already have an order. To make a new order, please cancel the previous one." << std::endl;
+	}
+	else {
+		std::cout << "You already have an order. You can make a new order after you pay the order and rate the driver. After that you should wait for the payment to be recieved." << std::endl;
 	}
 }
 void ClientConsole::checkOrder() {
@@ -242,11 +258,18 @@ void ClientConsole::checkOrder() {
 		std::cout << "No orders. \n";
 		return;
 	}
+	
 	if (getClients()[indexCurrentClient].getOrder().isOrderCompleted()) {
 		getClients()[indexCurrentClient].removeOrder();
 		checkOrder();
 		return;
 	}
+	
+	if (getClients()[indexCurrentClient].getOrder().getIsFinished()) {
+		std::cout << "\nOrder is finished. Please pay the order and rate the driver. After that you should wait for the payment to be recieved.\n";
+		return;
+	}
+	
 	if (getClients()[indexCurrentClient].getOrder().getIsAccepted() == -1) {
 		std::cout << "Order has been canceled/denied. Removing order";
 		int size = getOrderSystem().getOrders().getSize();
@@ -259,15 +282,19 @@ void ClientConsole::checkOrder() {
 		return;
 	}
 	if (getClients()[indexCurrentClient].getOrder().getIsAccepted() == 0) {
-		std::cout << "Still waiting for a responce from driver";
+		std::cout << "\nStill waiting for a responce from driver";
+		std::cout << "\nCurrent order: From " << getClients()[indexCurrentClient].getOrder().getCurrentAddress().getName() << " to " << getClients()[indexCurrentClient].getOrder().getDestination().getName() << "\n";
 		return;
 	}
+	
 	if (getClients()[indexCurrentClient].getOrder().getIsAccepted() == 1) {
-		std::cout << "Order is accepted. Minutes Left: " << getClients()[indexCurrentClient].getOrder().getMinutesLeft() << "\n";
+		std::cout << "\nOrder is accepted. Minutes Left: " << getClients()[indexCurrentClient].getOrder().getMinutesLeft() << "\n";
 		std::cout << "Driver info: " << getDrivers()[getClients()[indexCurrentClient].getOrder().getIdDriver()].getFirstName() << " " 
 			<< getDrivers()[getClients()[indexCurrentClient].getOrder().getIdDriver()].getLastName() << "\n";
 		return;
 	}
+
+	
 }
 
 void ClientConsole::cancelOrder() {
@@ -279,11 +306,16 @@ void ClientConsole::cancelOrder() {
 	if (getClients()[indexCurrentClient].getOrder().isOrderCompleted()) {
 		getClients()[indexCurrentClient].removeOrder();
 		cancelOrder();
+		return;
 	}
 	
 	if (getClients()[indexCurrentClient].getOrder().getIsAccepted() != 1 && getClients()[indexCurrentClient].getOrder().getIsFinished() != 1) {
 		getClients()[indexCurrentClient].getOrder().setIsAccepted(-1);
 		getClients()[indexCurrentClient].removeOrder();
+		std::cout << "\nOrder is canceled.\n";
+	}
+	else {
+		std::cout << "\nOrder has been accepted. You cannot cancel it.\n";
 	}
 	return;
 }
@@ -342,6 +374,7 @@ void ClientConsole::pay() {
 		}
 
 		getClients()[indexCurrentClient].pay(toPay);
+		break;
 	}
 
 	getClients()[indexCurrentClient].getOrder().setCost(toPay);
@@ -361,7 +394,7 @@ void ClientConsole::rate()  {
 	}
 
 	if (getClients()[indexCurrentClient].getOrder().getRated()) {
-		std::cout << "Order is already paid.\n";
+		std::cout << "Order is already rated.\n";
 		return;
 	}
 
@@ -390,6 +423,8 @@ void ClientConsole::rate()  {
 			continue;
 		}
 		getClients()[indexCurrentClient].getOrder().setRated(choice);
+		
+		break;
 	}
 	if (getClients()[indexCurrentClient].getOrder().isOrderCompleted()) {
 		getClients()[indexCurrentClient].removeOrder();
@@ -422,12 +457,19 @@ void ClientConsole::assignDriver() {
 	int minDistance = INT32_MAX;
 
 	for (int i = 0; i < size; i++) {
-		if (minDistance > start.getDistance(getDrivers()[i].getAddress().getPoint())) {
-			if (getDrivers()[i].getOrderPointer() == nullptr) {
+		if (getDrivers()[i].getOrderPointer() == nullptr) {
+			if (minDistance > start.getDistance(getDrivers()[i].getAddress().getPoint())) {
+
 				minDistance = start.getDistance(getDrivers()[i].getAddress().getPoint());
 				indexDriverClosest = i;
 			}
 		}
+
+		else if (getDrivers()[i].getOrder().isOrderCompleted()) {
+			getDrivers()[i].removeOrder();
+			i--;
+		}
+		
 	}
 
 	getClients()[indexCurrentClient].getOrder().setIdDriver(indexDriverClosest);
